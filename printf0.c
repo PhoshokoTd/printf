@@ -1,48 +1,86 @@
+#include <stdarg.h>
+#include <unistd.h>
 #include "main.h"
+/**
+ * find_function - function that finds formats for _printf
+ * @format: format (char, string, int, dec)
+ * Return: 0
+ */
+
+int (*find_function(const char *format))(va_list)
+{
+	unsigned int i = 0;
+	code_f find_f[] = {
+		{"c", print_char},
+		{"s", print_string},
+		{"i", print_int},
+		{"d", print_dec},
+		{NULL, NULL}
+	};
+
+	while (find_f[i].sc)
+	{
+		if (find_f[i].sc[0] == (*format))
+			return (find_f[i].f);
+		i++;
+	}
+	return (NULL);
+}
 
 /**
- * _printf - prints anything
- * @format: the format string
- * Return: number of bytes printed
+ * _putchar - writes the character c to stdout
+ * @c: The character to print
+ * Return: On success 1.
+ * On error, -1 is returned, and errno is set appropriately.
  */
+
+int _putchar(char c)
+{
+	return (write(1, &c, 1));
+}
+
+/**
+ * _printf - function to produce output
+ * @format: format (char, string, int, dec)
+ * Return: size of output text
+ */
+
 int _printf(const char *format, ...)
 {
-	int sum = 0;
-	va_list ap;
-	char *p, *start;
-	params_t params = PARAMS_INIT;
+	va_list list;
+	int (*f)(va_list);
+	unsigned int i = 0, cprint = 0;
 
-	va_start(ap, format);
+	if (format == NULL)
+		return (-1);
+	va_start(list, format);
 
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	for (p = (char *)format; *p; p++)
+	while (format[i])
 	{
-		init_params(&params, ap);
-		if (*p != '%')
+		while (format[i] != '%' && format[i])
 		{
-			sum += _putchar(*p);
+			_putchar(format[i]);
+			cprint++;
+			i++;
+		}
+		if (format[i] == '\0')
+			return (cprint);
+		f = find_function(&format[i + 1]);
+		if (f != NULL)
+		{
+			cprint += f(list);
+			i += 2;
 			continue;
 		}
-		start = p;
-		p++;
-		while (get_flag(p, &params)) /* while char at p is flag char */
-		{
-			p++; /* next char */
-		}
-		p = get_width(p, &params, ap);
-		p = get_precision(p, &params, ap);
-		if (get_modifier(p, &params))
-			p++;
-																							if (!get_specifier(p))
-			sum += print_from_to(start, p,
-				params.l_modifier || params.h_modifier ? p - 1 : 0);
+		if (!format[i + 1])
+			return (-1);
+		_putchar(format[i]);
+		cprint++;
+		if (format[i + 1] == '%')
+			i += 2;
 		else
-			sum += get_print_func(p, ap, &params);
+			i++;
 	}
-	_putchar(BUF_FLUSH);
-	va_end(ap);
-	return (sum);
+	va_end(list);
+	return (cprint);
 }
