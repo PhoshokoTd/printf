@@ -1,6 +1,7 @@
 #include "main.h"
 
 /************************* PRINT CHAR *************************/
+
 /**
  * print_char - Prints a char
  * @types: List a of arguments
@@ -95,6 +96,7 @@ int print_percent(va_list types, char buffer[],
 	UNUSED(size);
 	return (write(1, "%%", 1));
 }
+
 /************************* PRINT INT *************************/
 /**
  * print_int - Print int
@@ -138,6 +140,7 @@ int print_int(va_list types, char buffer[],
 
 	return (write_number(is_negative, i, buffer, flags, width, precision, size));
 }
+
 /************************* PRINT BINARY *************************/
 /**
  * print_binary - Prints an unsigned number
